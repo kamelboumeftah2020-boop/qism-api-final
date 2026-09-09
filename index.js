@@ -1,40 +1,202 @@
-<!DOCTYPE html><html lang="en" class="optimisticai_d4925249-module__WZtcjq__variable optimisticmono_9b82a078-module__hMSRWa__variable light"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/_next/static/immutable/chunks/0_n83orcwyk4s.css" data-precedence="next"/><link rel="stylesheet" href="/_next/static/immutable/chunks/14eov6urzq3_c.css" data-precedence="next"/><link rel="stylesheet" href="/_next/static/immutable/chunks/42e7h9g2vn8e3.css" data-precedence="next"/><link rel="stylesheet" href="/_next/static/immutable/chunks/287l5xq35imjj.css" data-precedence="next"/><link rel="stylesheet" href="/_next/static/immutable/chunks/17oghy4n4g9qf.css" data-precedence="next"/><link rel="preload" as="script" fetchPriority="low" href="/_next/static/immutable/chunks/36baba7il59p9.js"/><script src="/_next/static/immutable/chunks/2hcldb6dpiu2q.js" async=""></script><script src="/_next/static/immutable/chunks/2nqiqj-lrk2yk.js" async=""></script><script src="/_next/static/immutable/chunks/turbopack-1sq9_w2zyiq_g.js" async=""></script><script src="/_next/static/immutable/chunks/1dq47j4p-xg3o.js" async=""></script><script src="/_next/static/immutable/chunks/0plfqy-1kt7-q.js" async=""></script><meta name="next-size-adjust" content=""/><script>(function(){try{var d=document.documentElement,m=window.matchMedia("(prefers-color-scheme: dark)");function a(){var c=d.classList;if(m.matches){c.remove("light");c.add("dark");}else{c.remove("dark");c.add("light");}}a();m.addEventListener("change",a);}catch(e){}})()</script><meta name="sentry-trace" content="9b15d85d22a245aab8e65f7f6a7cc092-80b585610b7b8b29-0"/><meta name="baggage" content="sentry-environment=production,sentry-release=f509da1d8f958a51b0e8c666b3cb413f485929c3,sentry-public_key=217336c598020d63d1a44137ff8fdb71,sentry-trace_id=9b15d85d22a245aab8e65f7f6a7cc092,sentry-org_id=4509963614355457,sentry-sampled=false,sentry-sample_rand=0.38315108639857964,sentry-sample_rate=0.1"/><script src="/_next/static/immutable/chunks/0cz1d0mv5g_q7.js" noModule=""></script></head><body><div hidden=""><!--$--><!--/$--></div><div class="min-h-dvh px-6 pt-8 pb-8 font-mono text-[14px] leading-[1.6]"><pre class="mx-auto flex max-w-[1000px] items-start bg-transparent"><div class="text-text-tertiary border-fill-divider me-4 min-w-[40px] shrink-0 border-e pe-4 text-end select-none" aria-hidden="true"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div><div>61</div><div>62</div><div>63</div><div>64</div><div>65</div><div>66</div><div>67</div><div>68</div><div>69</div><div>70</div><div>71</div><div>72</div><div>73</div><div>74</div><div>75</div><div>76</div><div>77</div><div>78</div><div>79</div><div>80</div><div>81</div><div>82</div><div>83</div><div>84</div><div>85</div><div>86</div><div>87</div><div>88</div><div>89</div><div>90</div><div>91</div><div>92</div><div>93</div><div>94</div><div>95</div><div>96</div><div>97</div><div>98</div><div>99</div><div>100</div><div>101</div><div>102</div><div>103</div><div>104</div><div>105</div><div>106</div><div>107</div><div>108</div><div>109</div><div>110</div><div>111</div><div>112</div><div>113</div><div>114</div><div>115</div><div>116</div><div>117</div><div>118</div><div>119</div><div>120</div><div>121</div><div>122</div><div>123</div><div>124</div><div>125</div><div>126</div><div>127</div><div>128</div><div>129</div><div>130</div><div>131</div><div>132</div><div>133</div><div>134</div><div>135</div><div>136</div><div>137</div><div>138</div><div>139</div><div>140</div><div>141</div><div>142</div><div>143</div><div>144</div><div>145</div><div>146</div><div>147</div><div>148</div><div>149</div><div>150</div><div>151</div><div>152</div><div>153</div><div>154</div><div>155</div><div>156</div><div>157</div><div>158</div><div>159</div><div>160</div><div>161</div><div>162</div><div>163</div><div>164</div><div>165</div><div>166</div><div>167</div><div>168</div><div>169</div><div>170</div><div>171</div><div>172</div><div>173</div><div>174</div><div>175</div><div>176</div><div>177</div><div>178</div><div>179</div><div>180</div><div>181</div><div>182</div><div>183</div><div>184</div><div>185</div><div>186</div><div>187</div><div>188</div><div>189</div><div>190</div><div>191</div><div>192</div><div>193</div><div>194</div><div>195</div><div>196</div><div>197</div><div>198</div><div>199</div><div>200</div><div>201</div><div>202</div><div>203</div></div><code class="block min-w-0 flex-1 overflow-x-auto whitespace-pre"><pre class="shiki shiki-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e" tabindex="0"><code><span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">import</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> express </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">from</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> 'express'</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">;</span></span>
-<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">import</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> cors </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">from</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> 'cors'</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">;</span></span>
-<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">import</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> pg </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">from</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> 'pg'</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">;</span></span>
-<span class="line"></span>
-<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">const</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> app</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> =</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0"> express</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">();</span></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">app.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">use</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">cors</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">());</span></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">app.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">use</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(express.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">json</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">());</span></span>
-<span class="line"></span>
-<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">let</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> pool </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">;</span></span>
-<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">if</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> (process.env.</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">DATABASE_URL</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  pool </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">=</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> new</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> pg.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">Pool</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">({ connectionString: process.env.</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">DATABASE_URL</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, ssl: { rejectUnauthorized: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">false</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> } });</span></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  console.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">log</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">'DB pool created'</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">);</span></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">}</span></span>
-<span class="line"></span>
-<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D">// === INIT DB ===</span></span>
-<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">async</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> function</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0"> initDB</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(){</span></span>
-<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">  if</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">!</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">pool) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">return</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">;</span></span>
-<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">  try</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">{</span></span>
-<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">    await</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> pool.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">query</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">`</span></span>
-<span class="line"><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">      CREATE TABLE IF NOT EXISTS fund (id SERIAL PRIMARY KEY, amount INT DEFAULT 25000, updated_at TIMESTAMP DEFAULT NOW());</span></span>
-<span class="line"><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">      CREATE TABLE IF NOT EXISTS payments (id SERIAL PRIMARY KEY, amount INT, status TEXT, checkout_id TEXT, method TEXT DEFAULT 'chargily', created_at TIMESTAMP DEFAULT NOW());</span></span>
-<span class="line"><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">      CREATE TABLE IF NOT EXISTS transactions (id SERIAL PRIMARY KEY, type TEXT, amount INT, description TEXT, created_at TIMESTAMP DEFAULT NOW());</span></span>
-<span class="line"><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">      CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name TEXT, phone TEXT);</span></span>
-<span class="line"><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">    `</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">);</span></span>
-<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">    const</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> f</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> =</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583"> await</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> pool.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">query</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">'SELECT * FROM fund LIMIT 1'</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">);</span></span>
-<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">    if</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(f.rows.</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">length</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">===</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">0</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">await</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> pool.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">query</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">'INSERT INTO fund(amount) VALUES(25000)'</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">);</span></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">    console.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">log</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">'DB ready'</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">);</span></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  }</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">catch</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(e){ console.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">log</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">'DB init error'</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, e.message); }</span></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">}</span></span>
-<span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">initDB</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">();</span></span>
-<span class="line"></span>
-<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D">// === ROUTES ===</span></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">app.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">get</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">'/health'</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">async</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70">req</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">,</span><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70">res</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">)</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">=></span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">{</span></span>
-<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">  let</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> db</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">false</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">; </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">try</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">{ </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">if</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(pool){ </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">await</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> pool.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">query</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">'SELECT 1'</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">); db</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">true</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">; } }</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">catch</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">{}</span></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">  res.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">json</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">({ ok:</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">true</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, version:</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">'2.2.0'</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, live:</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">true</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, db, fund:</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">25000</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">, time:</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">new</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0"> Date</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">().</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">toISOString</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">() });</span></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">});</span></span>
-<span class="line"></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">app.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">get</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">'/api/debug'</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">,(</span><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70">req</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">,</span><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70">res</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">)</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">=></span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">{</span></span>
-<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">  const</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> k</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">=</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(process.env.</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF">CHARGILY_API_KEY</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">||</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">''</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">).</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">trim</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">();</span></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki
+import express from 'express';
+import cors from 'cors';
+import pg from 'pg';
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+let pool = null;
+if (process.env.DATABASE_URL) {
+  pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+  console.log('DB pool created');
+}
+
+// === INIT DB ===
+async function initDB(){
+  if(!pool) return;
+  try{
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS fund (id SERIAL PRIMARY KEY, amount INT DEFAULT 25000, updated_at TIMESTAMP DEFAULT NOW());
+      CREATE TABLE IF NOT EXISTS payments (id SERIAL PRIMARY KEY, amount INT, status TEXT, checkout_id TEXT, method TEXT DEFAULT 'chargily', created_at TIMESTAMP DEFAULT NOW());
+      CREATE TABLE IF NOT EXISTS transactions (id SERIAL PRIMARY KEY, type TEXT, amount INT, description TEXT, created_at TIMESTAMP DEFAULT NOW());
+      CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name TEXT, phone TEXT);
+    `);
+    const f = await pool.query('SELECT * FROM fund LIMIT 1');
+    if(f.rows.length===0) await pool.query('INSERT INTO fund(amount) VALUES(25000)');
+    console.log('DB ready');
+  }catch(e){ console.log('DB init error', e.message); }
+}
+initDB();
+
+// === ROUTES ===
+app.get('/health', async (req,res)=>{
+  let db=false; try{ if(pool){ await pool.query('SELECT 1'); db=true; } }catch{}
+  res.json({ ok:true, version:'2.2.0', live:true, db, fund:25000, time:new Date().toISOString() });
+});
+
+app.get('/api/debug',(req,res)=>{
+  const k=(process.env.CHARGILY_API_KEY||'').trim();
+  res.json({ hasKey:!!k, isSecret:k.startsWith('test_sk_'), isPublic:k.startsWith('test_pk_'), len:k.length, preview:k? k.substring(0,12)+'...' : null, hasDb:!!pool, env: Object.keys(process.env).filter(x=>x.includes('CHARGILY')).length });
+});
+
+app.get('/api/fund', async (req,res)=>{
+  if(!pool) return res.json({ amount:25000, source:'memory' });
+  try{
+    const r = await pool.query('SELECT amount FROM fund ORDER BY id DESC LIMIT 1');
+    const t = await pool.query('SELECT COALESCE(SUM(CASE WHEN type=\'income\' THEN amount ELSE -amount END),0) as net FROM transactions');
+    res.json({ amount: r.rows[0]?.amount || 25000, net: parseInt(t.rows[0]?.net||0), source:'db' });
+  }catch(e){ res.json({ amount:25000, source:'error', error:e.message }); }
+});
+
+app.get('/api/transactions', async (req,res)=>{
+  if(!pool) return res.json([]);
+  try{
+    const r = await pool.query('SELECT * FROM transactions ORDER BY id DESC LIMIT 50');
+    const p = await pool.query('SELECT * FROM payments ORDER BY id DESC LIMIT 20');
+    res.json({ transactions: r.rows, payments: p.rows });
+  }catch(e){ res.status(500).json({error:e.message}); }
+});
+
+app.post('/api/transaction', async (req,res)=>{
+  const { type='income', amount=0, description='' } = req.body;
+  if(!pool) return res.json({ ok:true, mock:true });
+  try{
+    await pool.query('INSERT INTO transactions(type,amount,description) VALUES($1,$2,$3)', [type, parseInt(amount), description]);
+    if(type==='income'){
+      await pool.query('UPDATE fund SET amount = amount + $1', [parseInt(amount)]);
+    } else {
+      await pool.query('UPDATE fund SET amount = amount - $1', [parseInt(amount)]);
+    }
+    res.json({ ok:true });
+  }catch(e){ res.status(500).json({error:e.message}); }
+});
+
+app.post('/api/pay/create', async (req,res)=>{
+  const amount=parseInt(req.body.amount)||1000;
+  const key=(process.env.CHARGILY_API_KEY||'').trim();
+  const base = key.startsWith('test_') ? 'https://pay.chargily.net/test/api/v2' : 'https://pay.chargily.net/api/v2';
+
+  if(!key || key.startsWith('test_pk_')){
+    if(pool) await pool.query('INSERT INTO payments(amount,status,checkout_id) VALUES($1,$2,$3)', [amount,'mock','mock_'+Date.now()]);
+    return res.json({ checkout_url:`/?pay=success&mock=${amount}`, mock:true, message:'ضع test_sk_ في Environment ليصبح حقيقي' });
+  }
+
+  try{
+    const r=await fetch(`${base}/checkouts`,{
+      method:'POST',
+      headers:{ Authorization:`Bearer ${key}`, 'Content-Type':'application/json' },
+      body:JSON.stringify({ amount, currency:'dzd', success_url:`https://${req.headers.host}/?pay=success`, failure_url:`https://${req.headers.host}/?pay=fail`, description:`QISM - ${amount} DZD` })
+    });
+    const d=await r.json();
+    console.log('Chargily', r.status, d);
+    if(!r.ok){
+      // fallback mock حتى لو حسابك غير مفعل
+      if(pool) await pool.query('INSERT INTO payments(amount,status,checkout_id) VALUES($1,$2,$3)', [amount,'mock_fallback',d.message||'error']);
+      return res.json({ checkout_url:`/?pay=success&mock=${amount}`, mock:true, chargily_error:d, hint:'حسابك قيد المراجعة - استعمل الوضع التجريبي' });
+    }
+    if(pool) await pool.query('INSERT INTO payments(amount,status,checkout_id) VALUES($1,$2,$3)', [amount,'pending',d.id]);
+    res.json(d);
+  }catch(e){
+    res.json({ checkout_url:`/?pay=success&mock=${amount}`, mock:true, error:e.message });
+  }
+});
+
+app.post('/api/pay/webhook', async (req,res)=>{
+  try{
+    const { checkout_id, status, amount } = req.body || {};
+    if(status==='paid' && pool){
+      await pool.query("UPDATE payments SET status='paid' WHERE checkout_id=$1", [checkout_id]);
+      await pool.query("UPDATE fund SET amount = amount + $1", [parseInt(amount||0)]);
+      await pool.query("INSERT INTO transactions(type,amount,description) VALUES('income',$1,$2)", [parseInt(amount||0), `دفع Chargily ${checkout_id}`]);
+    }
+    res.json({ok:true});
+  }catch{ res.json({ok:true}); }
+});
+
+// === DASHBOARD HTML ===
+app.get('/', (req,res)=>{
+  res.send(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QISM - قسم</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+<style>body{font-family:'Tajawal',sans-serif}</style>
+</head><body class="bg-[#faf9f6] min-h-screen">
+<div class="max-w-6xl mx-auto p-4 md:p-6">
+<header class="flex justify-between items-center mb-6">
+<div class="flex items-center gap-3"><div class="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white font-bold">ق</div><div><h1 class="font-bold text-xl">QISM</h1><p class="text-xs text-gray-500">منصة الادخار الذكي - الشلف</p></div></div>
+<div class="flex gap-2"><a href="/health" class="text-xs bg-white px-3 py-1.5 rounded-full border">Health</a><a href="/api/debug" class="text-xs bg-white px-3 py-1.5 rounded-full border">Debug</a></div>
+</header>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+<div class="bg-black text-white rounded-[24px] p-6"><p class="text-white/60 text-sm">الرصيد الكلي</p><h2 id="fund" class="text-3xl font-bold mt-2">-- DZD</h2><p class="text-emerald-400 text-xs mt-3">▲ +12% هذا الشهر</p></div>
+<div class="bg-white rounded-[24px] p-6 border"><p class="text-gray-500 text-sm">صندوق الطوارئ</p><div class="flex items-end gap-2 mt-2"><h2 class="text-3xl font-bold">25,000</h2><span class="text-sm mb-1">DZD</span></div><div class="w-full h-2 bg-gray-100 rounded-full mt-4"><div class="h-2 bg-black rounded-full" style="width:100%"></div></div><p class="text-xs text-gray-500 mt-2">الهدف مكتمل ✅</p></div>
+<div class="bg-white rounded-[24px] p-6 border"><p class="text-gray-500 text-sm">حالة Chargily</p><p id="chargilyStatus" class="font-bold mt-2">جاري الفحص...</p><p class="text-xs text-gray-500 mt-2">المفتاح: <span id="keyPreview">--</span></p><button onclick="testPay()" class="mt-4 w-full bg-emerald-500 text-white py-2.5 rounded-xl text-sm font-bold">جرب دفع 1000 دج</button></div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="md:col-span-2 bg-white rounded-[24px] p-6 border">
+<div class="flex justify-between items-center mb-4"><h3 class="font-bold">المعاملات الأخيرة</h3><button onclick="addIncome()" class="text-xs bg-black text-white px-3 py-1.5 rounded-full">+ إضافة</button></div>
+<div id="txList" class="space-y-3 text-sm"><p class="text-gray-400">جاري التحميل...</p></div>
+</div>
+<div class="bg-white rounded-[24px] p-6 border">
+<h3 class="font-bold mb-4">إجراءات سريعة</h3>
+<div class="space-y-2">
+<button onclick="addIncome(5000)" class="w-full text-right p-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-sm">💰 إضافة مدخول 5000 دج</button>
+<button onclick="addExpense(1000)" class="w-full text-right p-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-sm">💸 سحب 1000 دج</button>
+<button onclick="testPay(5000)" class="w-full text-right p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-sm border border-emerald-200">💳 دفع 5000 دج عبر البطاقة</button>
+<button onclick="location.href='/api/transactions'" class="w-full text-right p-3 rounded-xl bg-gray-50 text-sm">📊 عرض كل المعاملات JSON</button>
+</div>
+<div class="mt-6 p-3 bg-amber-50 rounded-xl text-xs leading-5">💡 <b>نصيحة QISM:</b> صندوق الطوارئ 25,000 دج يكفيك 3 أشهر. حافظ عليه ولا تمسّو إلا للضرورة.</div>
+</div>
+</div>
+
+<div class="mt-6 text-center text-[11px] text-gray-400">QISM v2.2.0 • LIVE على Render • Chlef, Algeria • ${new Date().getFullYear()}</div>
+</div>
+
+<script>
+const API = location.origin;
+async function load(){
+  try{
+    const [f,d] = await Promise.all([fetch('/api/fund').then(r=>r.json()), fetch('/api/debug').then(r=>r.json())]);
+    document.getElementById('fund').innerText = (f.amount||25000).toLocaleString()+' DZD';
+    document.getElementById('keyPreview').innerText = d.preview||'غير موجود';
+    document.getElementById('chargilyStatus').innerText = d.isSecret ? '✅ مفتاح سري صحيح (test_sk_)' : d.isPublic ? '⚠️ مفتاح عام - بدّل لـ test_sk_' : '❌ لا يوجد مفتاح';
+    document.getElementById('chargilyStatus').className = d.isSecret ? 'font-bold mt-2 text-emerald-600' : 'font-bold mt-2 text-amber-600';
+    loadTx();
+  }catch(e){ console.log(e); }
+}
+async function loadTx(){
+  try{
+    const r = await fetch('/api/transactions').then(r=>r.json());
+    const list = document.getElementById('txList');
+    const all = [...(r.transactions||[]), ...(r.payments||[])].slice(0,10);
+    if(all.length===0){ list.innerHTML='<p class="text-gray-400">لا توجد معاملات بعد - جرب إضافة مدخول</p>'; return; }
+    list.innerHTML = all.map(t=>`<div class="flex justify-between p-2.5 bg-gray-50 rounded-xl"><div><p class="font-bold">\${t.description||t.type||'دفع'} </p><p class="text-[11px] text-gray-500">\${new Date(t.created_at).toLocaleString('ar-DZ')}</p></div><p class="font-bold \${(t.type==='income'||t.status==='paid')?'text-emerald-600':''}">\${t.amount} دج</p></div>`).join('');
+  }catch{}
+}
+async function testPay(a=1000){
+  const btn = event?.target; if(btn) btn.innerText='جاري...';
+  try{
+    const r = await fetch('/api/pay/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:a})}).then(r=>r.json());
+    if(r.checkout_url){ if(r.mock) alert('وضع تجريبي: '+(r.message||'Chargily قيد المراجعة - تمت المحاكاة')); location.href=r.checkout_url; } else alert(JSON.stringify(r));
+  }catch(e){ alert(e.message); }
+  if(btn) btn.innerText='جرب دفع 1000 دج';
+}
+async function addIncome(a){
+  const amount = a || parseInt(prompt('المبلغ:')||'0'); if(!amount) return;
+  await fetch('/api/transaction',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'income',amount,description:'مدخول يدوي'})});
+  load();
+}
+async function addExpense(a){
+  const amount = a || parseInt(prompt('المبلغ:')||'0'); if(!amount) return;
+  await fetch('/api/transaction',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'expense',amount,description:'مصروف'})});
+  load();
+}
+load();
+</script>
+</body></html>`);
+});
+
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, ()=>console.log('QISM v2.2 READY on '+PORT));
