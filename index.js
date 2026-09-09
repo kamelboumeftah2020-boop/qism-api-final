@@ -4,28 +4,39 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/health',(req,res)=>res.json({ok:true,version:'2.1.17',live:true}));
 app.get('/api/debug',(req,res)=>{
-  const k=process.env.CHARGILY_API_KEY||'';
-  res.json({hasKey:!!k, isSecret:k.startsWith('test_sk_'), isPublic:k.startsWith('test_pk_'), len:k.length});
+  const k=(process.env.CHARGILY_API_KEY||'').trim();
+  res.json({hasKey:!!k, isSecret:k.startsWith('test_sk_'), len:k.length, preview:k.substring(0,12)+'...'});
 });
 
 app.post('/api/pay/create', async (req,res)=>{
-  const amount=req.body.amount||1000;
-  const key=process.env.CHARGILY_API_KEY||'';
-  if(!key || key.startsWith('test_pk_')){
-    return res.json({checkout_url:`/?pay=success&mock=${amount}`, mock:true, msg:'حط test_sk_ باش يولي دفع حقيقي - درك راهو تجريبي'});
+  const amount=parseInt(req.body.amount)||1000;
+  const key=(process.env.CHARGILY_API_KEY||'').trim();
+  if(!key ||!key.startsWith('test_sk_')){
+    return res.json({checkout_url:`/?pay=success&mock=${amount}`, mock:true});
   }
-  const base=key.startsWith('test_')?'https://pay.chargily.net/test/api/v2':'https://pay.chargily.net/api/v2';
+  const base='https://pay.chargily.net/test/api/v2';
   try{
-    const r=await fetch(`${base}/checkouts`,{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({amount,currency:'dzd'})});
+    const r=await fetch(`${base}/checkouts`,{
+      method:'POST',
+      headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},
+      body:JSON.stringify({
+        amount,
+        currency:'dzd',
+        success_url:`https://${req.headers.host}/?pay=success`,
+        failure_url:`https://${req.headers.host}/?pay=fail`,
+        description:'QISM test payment'
+      })
+    });
     const d=await r.json();
-    if(!r.ok && d.message==='Unauthenticated.'){
-      return res.json({checkout_url:`/?pay=success&mock=${amount}`, mock:true, msg:'المفتاح مرفوض - تأكد test_sk_ وحسابك مفعل'});
+    if(!r.ok){
+      console.log('Chargily fail',r.status,d);
+      // إذا الحساب مازال معلق، رجع mock باش تكمل
+      return res.json({checkout_url:`/?pay=success&mock=${amount}`, mock:true, chargily_error:d});
     }
     res.json(d);
   }catch(e){res.json({checkout_url:`/?pay=success&mock=${amount}`, mock:true, error:e.message});}
 });
 
-app.get('/',(req,res)=>res.send(`<h1>QISM v2.1.17 LIVE ✅</h1><p><a href=/health>Health</a> | <a href=/api/debug>Debug</a></p><button onclick="fetch('/api/pay/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:1000})}).then(r=>r.json()).then(d=>location.href=d.checkout_url)">جرب دفع 1000 دج</button>`));
+app.get('/',(req,res)=>res.send(`<h1>QISM v2.1.17 LIVE ✅</h1><a href=/api/debug>Debug</a><br><button onclick="fetch('/api/pay/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:1000})}).then(r=>r.json()).then(d=>location.href=d.checkout_url)">جرب دفع 1000 دج</button>`));
 app.listen(process.env.PORT||10000);
