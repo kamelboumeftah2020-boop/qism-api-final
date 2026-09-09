@@ -73,6 +73,15 @@ app.post('/api/pay/webhook', async (req,res)=>{
 app.get('/', (req,res)=>res.send(`<h1>QISM v2.1.17 LIVE ✅</h1>
 <p><a href=/health>Health</a> | <a href=/api/fund>Fund</a></p>
 <button onclick="fetch('/api/pay/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:1000})}).then(r=>r.json()).then(d=>{if(d.checkout_url) location.href=d.checkout_url; else alert(JSON.stringify(d))})">جرب دفع 1000 دج</button>`));
-
+// باش نعرفو إذا المفتاح راهو يلحق لـ Render ولا لا
+app.get('/api/debug', (req,res)=>{
+  const key = process.env.CHARGILY_API_KEY || '';
+  res.json({
+    hasKey: !!key,
+    prefix: key.substring(0,5), // يوري test_ ولا live_
+    length: key.length,
+    hasDb: !!process.env.DATABASE_URL
+  });
+});
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, ()=>console.log('QISM FINAL on '+PORT));
