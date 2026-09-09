@@ -8,10 +8,7 @@ app.use(express.json());
 
 let pool = null;
 if (process.env.DATABASE_URL) {
-  pool = new pg.Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
-  });
+  pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 }
 
 app.get('/health', async (req,res)=>{
@@ -20,8 +17,13 @@ app.get('/health', async (req,res)=>{
   res.json({ ok:true, version:'2.1.17', live:true, db, fund:25000 });
 });
 
+app.get('/api/debug', (req,res)=>{
+  const key = process.env.CHARGILY_API_KEY || '';
+  res.json({ hasKey:!!key, prefix: key.substring(0,5), length: key.length, hasDb:!!process.env.DATABASE_URL });
+});
+
 app.get('/api/fund', async (req,res)=>{
-  if(!pool) return res.json({ amount:25000, source:'memory' });
+  if(!pool) return res.json({ amount:25000, source:'memory - زيد DATABASE_URL باش تولي db' });
   try{
     await pool.query(`CREATE TABLE IF NOT EXISTS fund (id SERIAL PRIMARY KEY, amount INT DEFAULT 25000);
     CREATE TABLE IF NOT EXISTS payments (id SERIAL PRIMARY KEY, amount INT, status TEXT, checkout_id TEXT, created_at TIMESTAMP DEFAULT NOW());`);
@@ -32,33 +34,44 @@ app.get('/api/fund', async (req,res)=>{
   }catch(e){ res.status(500).json({error:e.message}); }
 });
 
-// إنشاء رابط دفع Chargily
 app.post('/api/pay/create', async (req,res)=>{
   const { amount = 1000 } = req.body;
-  if(!process.env.CHARGILY_API_KEY) return res.status(400).json({error:'CHARGILY_API_KEY ناقص في Render'});
+  const key = process.env.CHARGILY_API_KEY || '';
+
+  if(!key){
+    return res.json({ checkout_url: `/?pay=success&mock=${amount}`, mock:true, message:'Mode تجريبي - زيد CHARGILY_API_KEY' });
+  }
+
+  // هذا هو الحل: نبدلو الرابط حسب المفتاح
+  const isTest = key.startsWith('test_');
+  const baseUrl = isTest? 'https://pay.chargily.net/test/api/v2' : 'https://pay.chargily.net/api/v2';
 
   try{
-    const resp = await fetch('https://pay.chargily.net/api/v2/checkouts', {
+    const resp = await fetch(`${baseUrl}/checkouts`, {
       method:'POST',
-      headers:{
-        'Authorization': `Bearer ${process.env.CHARGILY_API_KEY}`,
-        'Content-Type':'application/json'
-      },
+      headers:{ 'Authorization': `Bearer ${key}`, 'Content-Type':'application/json' },
       body: JSON.stringify({
-        amount,
+        amount: parseInt(amount),
         currency:'dzd',
-        success_url:`${req.headers.origin || 'https://qism-api-final.onrender.com'}/?pay=success`,
-        failure_url:`${req.headers.origin || 'https://qism-api-final.onrender.com'}/?pay=fail`,
-        webhook_endpoint: process.env.WEBHOOK_URL
+        success_url: `https://${req.headers.host}/?pay=success`,
+        failure_url: `https://${req.headers.host}/?pay=fail`
       })
     });
     const data = await resp.json();
-    if(pool) await pool.query('INSERT INTO payments(amount,status,checkout_id) VALUES($1,$2,$3)', [amount,'pending',data.id || data.checkout_id]);
+    console.log('Chargily URL:', baseUrl, 'Status:', resp.status, 'Data:', data);
+
+    if(!resp.ok){
+      return res.status(resp.status).json({
+        chargily_error: data,
+        used_url: baseUrl,
+        hint: isTest? 'مفتاح test_ لازم يضرب في /test/api/v2 - درك صححناه' : 'تأكد حسابك مفعل في Chargily'
+      });
+    }
+    if(pool) await pool.query('INSERT INTO payments(amount,status,checkout_id) VALUES($1,$2,$3)', [amount,'pending',data.id]);
     res.json(data);
   }catch(e){ res.status(500).json({error:e.message}); }
 });
 
-// Webhook يأكد الدفع ويزيد الصندوق
 app.post('/api/pay/webhook', async (req,res)=>{
   try{
     const { checkout_id, status } = req.body;
@@ -67,21 +80,12 @@ app.post('/api/pay/webhook', async (req,res)=>{
       await pool.query("UPDATE fund SET amount = amount + (SELECT amount FROM payments WHERE checkout_id=$1)", [checkout_id]);
     }
     res.json({ok:true});
-  }catch(e){ res.json({ok:true}); }
+  }catch{ res.json({ok:true}); }
 });
 
 app.get('/', (req,res)=>res.send(`<h1>QISM v2.1.17 LIVE ✅</h1>
-<p><a href=/health>Health</a> | <a href=/api/fund>Fund</a></p>
-<button onclick="fetch('/api/pay/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:1000})}).then(r=>r.json()).then(d=>{if(d.checkout_url) location.href=d.checkout_url; else alert(JSON.stringify(d))})">جرب دفع 1000 دج</button>`));
-// باش نعرفو إذا المفتاح راهو يلحق لـ Render ولا لا
-app.get('/api/debug', (req,res)=>{
-  const key = process.env.CHARGILY_API_KEY || '';
-  res.json({
-    hasKey: !!key,
-    prefix: key.substring(0,5), // يوري test_ ولا live_
-    length: key.length,
-    hasDb: !!process.env.DATABASE_URL
-  });
-});
+<p><a href=/health>Health</a> | <a href=/api/debug>Debug</a> | <a href=/api/fund>Fund</a></p>
+<button onclick="fetch('/api/pay/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:1000})}).then(r=>r.json()).then(d=>{console.log(d); if(d.checkout_url) location.href=d.checkout_url; else alert(JSON.stringify(d,null,2))})">جرب دفع 1000 دج</button>`));
+
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, ()=>console.log('QISM FINAL on '+PORT));
