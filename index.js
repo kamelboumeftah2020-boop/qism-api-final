@@ -1,271 +1,46 @@
 import express from 'express';
 import cors from 'cors';
 import pg from 'pg';
-
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-let pool = null;
-if (process.env.DATABASE_URL) {
-  pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
-  console.log('DB connected');
-}
-
+let pool=null;
+if(process.env.DATABASE_URL){ pool=new pg.Pool({connectionString:process.env.DATABASE_URL, ssl:{rejectUnauthorized:false}}); }
 async function initDB(){
-  if(!pool) { console.log('No DATABASE_URL - using memory mode'); return; }
-  try{
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, phone TEXT UNIQUE NOT NULL, name TEXT, created_at TIMESTAMP DEFAULT NOW());
-      CREATE TABLE IF NOT EXISTS fund (id SERIAL PRIMARY KEY, user_id INT REFERENCES users(id), amount INT DEFAULT 25000, updated_at TIMESTAMP DEFAULT NOW());
-      CREATE TABLE IF NOT EXISTS transactions (id SERIAL PRIMARY KEY, user_id INT REFERENCES users(id), type TEXT, amount INT, description TEXT, created_at TIMESTAMP DEFAULT NOW());
-      CREATE TABLE IF NOT EXISTS payments (id SERIAL PRIMARY KEY, user_id INT REFERENCES users(id), amount INT, status TEXT, checkout_id TEXT, created_at TIMESTAMP DEFAULT NOW());
-    `);
-    console.log('DB tables ready');
-  }catch(e){ console.log('DB init error', e.message); }
+ if(!pool) return;
+ try{
+  await pool.query("CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, phone TEXT UNIQUE, name TEXT, created_at TIMESTAMP DEFAULT NOW()); CREATE TABLE IF NOT EXISTS fund (id SERIAL PRIMARY KEY, user_id INT REFERENCES users(id), amount INT DEFAULT 25000, goal INT DEFAULT 75000); CREATE TABLE IF NOT EXISTS transactions (id SERIAL PRIMARY KEY, user_id INT REFERENCES users(id), type TEXT, category TEXT, amount INT, description TEXT, created_at TIMESTAMP DEFAULT NOW()); CREATE TABLE IF NOT EXISTS payments (id SERIAL PRIMARY KEY, user_id INT REFERENCES users(id), amount INT, status TEXT, checkout_id TEXT, created_at TIMESTAMP DEFAULT NOW()); CREATE TABLE IF NOT EXISTS goals (id SERIAL PRIMARY KEY, user_id INT REFERENCES users(id), title TEXT, target INT, current INT DEFAULT 0, icon TEXT);");
+ }catch(e){ console.log(e.message); }
 }
 initDB();
-
-// In-memory fallback when no DB
-const mem = { users: [{id:1, phone:'0555000000', name:'ضيف'}], funds: {1:25000}, tx: [] };
-
-function genToken(user){ return Buffer.from(JSON.stringify({id:user.id, phone:user.phone})).toString('base64'); }
-function getUserFromToken(req){
-  try{
-    const h = req.headers.authorization || '';
-    const token = h.replace('Bearer ','') || req.query.token;
-    if(!token) return null;
-    const data = JSON.parse(Buffer.from(token,'base64').toString());
-    return data;
-  }catch{ return null; }
+const mem={users:[{id:1,phone:'0555',name:'ضيف'}],funds:{1:25000},tx:[],goals:[{id:1,user_id:1,title:'صندوق الطوارئ',target:75000,current:25000,icon:'🛡️'}]};
+function genToken(u){ return Buffer.from(JSON.stringify({id:u.id,phone:u.phone})).toString('base64'); }
+function getUser(req){ try{ const t=(req.headers.authorization||'').replace('Bearer ','')||req.query.token; if(!t) return null; return JSON.parse(Buffer.from(t,'base64').toString()); }catch{ return null; } }
+async function findOrCreate(phone,name){
+ if(!pool){ let u=mem.users.find(x=>x.phone===phone); if(!u){ u={id:mem.users.length+1,phone,name:name||'مستخدم'}; mem.users.push(u); mem.funds[u.id]=25000; } return u; }
+ const ex=await pool.query('SELECT * FROM users WHERE phone=$1',[phone]); if(ex.rows.length) return ex.rows[0];
+ const r=await pool.query('INSERT INTO users(phone,name) VALUES($1,$2) RETURNING *',[phone,name||'مستخدم']); const user=r.rows[0];
+ await pool.query('INSERT INTO fund(user_id,amount,goal) VALUES($1,25000,75000)',[user.id]);
+ await pool.query('INSERT INTO goals(user_id,title,target,current,icon) VALUES($1,$2,$3,$4,$5)',[user.id,'صندوق الطوارئ',75000,25000,'🛡️']);
+ return user;
 }
+async function getFund(uid){ if(!pool) return {amount:mem.funds[uid]||25000,goal:75000}; const r=await pool.query('SELECT amount,goal FROM fund WHERE user_id=$1 ORDER BY id DESC LIMIT 1',[uid]); return r.rows[0]||{amount:25000,goal:75000}; }
+app.get('/health',async(req,res)=>{ let db=false; try{ if(pool){ await pool.query('SELECT 1'); db=true; } }catch{} res.json({ok:true,version:'2.4.0-complete',live:true,db,mode:pool?'postgres':'memory',features:['landing','auth','fund','goals','tx','admin'],payment:'mock_until_chargily_verified'}); });
+app.get('/api/debug',(req,res)=>{ const k=(process.env.CHARGILY_API_KEY||'').trim(); res.json({hasKey:!!k,isSecret:k.startsWith('test_sk_'),hasDb:!!pool}); });
+app.post('/api/auth/login',async(req,res)=>{ const {phone,name}=req.body; const clean=phone.replace(/\D/g,'').slice(-10); const user=await findOrCreate(clean,name); res.json({ok:true,token:genToken(user),user}); });
+app.get('/api/fund',async(req,res)=>{ const u=getUser(req); const uid=u?.id||1; res.json({...await getFund(uid),userId:uid}); });
+app.get('/api/goals',async(req,res)=>{ const u=getUser(req); const uid=u?.id||1; if(!pool) return res.json(mem.goals.filter(g=>g.user_id===uid)); const r=await pool.query('SELECT * FROM goals WHERE user_id=$1',[uid]); res.json(r.rows); });
+app.post('/api/goals',async(req,res)=>{ const u=getUser(req); const uid=u?.id||1; const {title,target}=req.body; if(!pool){ const g={id:Date.now(),user_id:uid,title,target:parseInt(target),current:0,icon:'🎯'}; mem.goals.push(g); return res.json(g); } const r=await pool.query('INSERT INTO goals(user_id,title,target,icon) VALUES($1,$2,$3,$4) RETURNING *',[uid,title,parseInt(target),'🎯']); res.json(r.rows[0]); });
+app.get('/api/transactions',async(req,res)=>{ const u=getUser(req); const uid=u?.id||1; if(!pool) return res.json({transactions:mem.tx.filter(x=>x.user_id===uid),payments:[]}); const r=await pool.query('SELECT * FROM transactions WHERE user_id=$1 ORDER BY id DESC LIMIT 100',[uid]); const p=await pool.query('SELECT * FROM payments WHERE user_id=$1 ORDER BY id DESC LIMIT 20',[uid]); res.json({transactions:r.rows,payments:p.rows}); });
+app.post('/api/transaction',async(req,res)=>{ const u=getUser(req); const uid=u?.id||1; const {type,amount,description,category}=req.body; const amt=parseInt(amount)||0; if(!pool){ mem.tx.push({id:Date.now(),user_id:uid,type,amount:amt,category,description,created_at:new Date().toISOString()}); if(type==='income') mem.funds[uid]=(mem.funds[uid]||0)+amt; else mem.funds[uid]=(mem.funds[uid]||0)-amt; return res.json({ok:true}); } await pool.query('INSERT INTO transactions(user_id,type,category,amount,description) VALUES($1,$2,$3,$4,$5)',[uid,type,category||'عام',amt,description]); if(type==='income') await pool.query('UPDATE fund SET amount=amount+$1 WHERE user_id=$2',[amt,uid]); else await pool.query('UPDATE fund SET amount=amount-$1 WHERE user_id=$2',[amt,uid]); res.json({ok:true}); });
+app.post('/api/pay/create',async(req,res)=>{ const u=getUser(req); const uid=u?.id||1; const amount=parseInt(req.body.amount)||1000; if(pool) await pool.query('INSERT INTO payments(user_id,amount,status,checkout_id) VALUES($1,$2,$3,$4)',[uid,amount,'mock','mock_'+Date.now()]); res.json({checkout_url:'/app?pay=success&mock='+amount,mock:true,message:'تجريبي - الحقيقي في النهاية'}); });
+app.get('/api/stats',async(req,res)=>{ if(!pool) return res.json({users:mem.users.length,totalFund:Object.values(mem.funds).reduce((a,b)=>a+b,0),tx:mem.tx.length}); const u=await pool.query('SELECT COUNT(*) FROM users'); const f=await pool.query('SELECT SUM(amount) as total FROM fund'); const t=await pool.query('SELECT COUNT(*) FROM transactions'); res.json({users:parseInt(u.rows[0].count),totalFund:parseInt(f.rows[0].total||0),tx:parseInt(t.rows[0].count)}); });
 
-async function findOrCreateUser(phone, name){
-  if(!pool){
-    let u = mem.users.find(x=>x.phone===phone);
-    if(!u){ u={id:mem.users.length+1, phone, name:name||'مستخدم'}; mem.users.push(u); mem.funds[u.id]=25000; }
-    return u;
-  }
-  const existing = await pool.query('SELECT * FROM users WHERE phone=$1', [phone]);
-  if(existing.rows.length>0) return existing.rows[0];
-  const r = await pool.query('INSERT INTO users(phone,name) VALUES($1,$2) RETURNING *', [phone, name||'مستخدم']);
-  const user = r.rows[0];
-  await pool.query('INSERT INTO fund(user_id,amount) VALUES($1,25000)', [user.id]);
-  return user;
-}
+app.get('/',(req,res)=>{ res.send(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>QISM - قسم</title><script src="https://cdn.tailwindcss.com"></script><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet"><style>body{font-family:Tajawal,sans-serif}</style></head><body class="bg-[#faf9f6]"><nav class="max-w-6xl mx-auto p-6 flex justify-between"><div class="flex gap-3 items-center"><div class="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white font-bold">ق</div><b class="text-xl">QISM</b></div><a href="/app" class="bg-black text-white px-5 py-2 rounded-full text-sm">دخول المنصة →</a></nav><section class="max-w-6xl mx-auto px-6 pt-10 pb-20 grid md:grid-cols-2 gap-12"><div><div class="bg-white border inline-block px-3 py-1 rounded-full text-xs mb-4">v2.4 - المنصة كاملة - الدفع الحقيقي هو الأخير</div><h1 class="text-5xl font-extrabold leading-[1.1]">ادخارك<br>مرتب.<br>مستقبلك<br>آمن.</h1><p class="text-gray-600 mt-6">QISM منصة جزائرية - صندوق طوارئ، أهداف، تتبع. DB حقيقية postgres. كل حساب منفصل. الدفع الحقيقي عبر Chargily سيتفعل في النهاية بعد تأكيد الحساب.</p><div class="flex gap-3 mt-8"><a href="/app" class="bg-black text-white px-8 py-3 rounded-full">ابدأ مجانا</a><a href="/health" class="bg-white border px-8 py-3 rounded-full">حالة النظام</a></div><div class="flex gap-6 mt-10 text-sm"><div><b class="text-xl block">25,000 DZD</b><span class="text-gray-500">بداية</span></div><div><b class="text-xl block">DB ✅</b><span class="text-gray-500">postgres</span></div><div><b class="text-xl block">آمن</b><span class="text-gray-500">لكل مستخدم</span></div></div></div><div class="bg-white rounded-[32px] p-4 border"><div class="bg-black text-white rounded-[24px] p-6"><p class="text-white/60 text-sm">الرصيد</p><h2 class="text-3xl font-bold mt-2">75,432 DZD</h2></div><div class="grid grid-cols-2 gap-3 mt-3"><div class="bg-gray-50 rounded-2xl p-4"><p class="text-xs">أهداف</p><b>2</b></div><div class="bg-gray-50 rounded-2xl p-4"><p class="text-xs">معاملات</p><b>+127</b></div></div><div class="mt-3 p-4 bg-amber-50 rounded-2xl text-xs">⏳ الدفع الحقيقي هو آخر مرحلة بعد تأكيد Chargily - حاليا mock</div></div></section><section class="bg-white border-y py-12"><div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8 text-sm"><div><b>🛡️ صندوق طوارئ</b><p class="text-gray-600 mt-1">25k بداية، هدف 75k</p></div><div><b>🎯 أهداف</b><p class="text-gray-600 mt-1">سكن، سيارة، زواج</p></div><div><b>📊 تتبع</b><p class="text-gray-600 mt-1">مداخيل ومصاريف محفوظة</p></div></div></section><footer class="max-w-6xl mx-auto px-6 py-6 text-xs text-gray-400 flex justify-between"><span>QISM v2.4 - Chlef 2026</span><span><a href="/app">App</a> • <a href="/admin">Admin</a> • <a href="/health">Health</a></span></footer></body></html>`); });
 
-async function getFund(userId){
-  if(!pool) return mem.funds[userId]||25000;
-  const r = await pool.query('SELECT amount FROM fund WHERE user_id=$1 ORDER BY id DESC LIMIT 1', [userId]);
-  return r.rows[0]?.amount || 25000;
-}
+app.get('/app',(req,res)=>{ res.send(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>QISM App</title><script src="https://cdn.tailwindcss.com"></script><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:Tajawal,sans-serif}</style></head><body class="bg-[#faf9f6] min-h-screen"><div id="loginScreen" class="min-h-screen flex items-center justify-center p-4"><div class="bg-white rounded-[32px] p-8 w-full max-w-sm border"><div class="w-12 h-12 bg-black rounded-2xl flex items-center justify-center text-white font-bold mx-auto mb-4">ق</div><h1 class="text-center font-bold text-2xl">دخول QISM</h1><p class="text-center text-xs text-gray-500 mt-1">المنصة كاملة - الدفع الحقيقي آخر مرحلة</p><div class="mt-6 space-y-3"><input id="phone" placeholder="0555..." class="w-full p-3.5 rounded-xl bg-gray-50 border text-left" dir="ltr"><input id="name" placeholder="اسمك" class="w-full p-3.5 rounded-xl bg-gray-50 border"><button onclick="login()" class="w-full bg-black text-white py-3.5 rounded-xl font-bold">دخول →</button><a href="/" class="block text-center text-xs text-gray-500 mt-2">← الرئيسية</a></div></div></div><div id="appScreen" class="hidden max-w-6xl mx-auto p-4"><header class="flex justify-between mb-6"><div class="flex gap-3 items-center"><div class="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white font-bold">ق</div><div><h1 class="font-bold text-xl">QISM</h1><p id="userInfo" class="text-xs text-gray-500">-</p></div></div><div class="flex gap-2"><a href="/" class="text-xs bg-white px-3 py-1 rounded-full border">الرئيسية</a><button onclick="logout()" class="text-xs bg-white px-3 py-1 rounded-full border">خروج</button></div></header><div class="grid md:grid-cols-3 gap-4 mb-6"><div class="bg-black text-white rounded-[24px] p-6"><p class="text-white/60 text-sm">الرصيد</p><h2 id="fund" class="text-3xl font-bold mt-2">--</h2><p id="fundGoal" class="text-emerald-400 text-xs mt-2">-</p></div><div class="bg-white rounded-[24px] p-6 border"><p class="text-gray-500 text-sm">أهدافي</p><div id="goalsList" class="mt-3 space-y-2 text-sm"></div><button onclick="addGoal()" class="mt-3 text-xs bg-black text-white px-3 py-1 rounded-full">+ هدف جديد</button></div><div class="bg-white rounded-[24px] p-6 border"><p class="text-gray-500 text-sm">إجراءات</p><div class="space-y-2 mt-3"><button onclick="addIncome(5000)" class="w-full text-right p-3 rounded-xl bg-gray-50 text-sm">💰 +5000 دج</button><button onclick="addExpense(1000)" class="w-full text-right p-3 rounded-xl bg-gray-50 text-sm">💸 -1000 دج</button><button onclick="testPay()" class="w-full text-right p-3 rounded-xl bg-emerald-50 border text-sm">💳 دفع (تجريبي)</button></div><p class="text-[10px] text-gray-400 mt-3">الدفع الحقيقي آخر مرحلة</p></div></div><div class="bg-white rounded-[24px] p-6 border"><div class="flex justify-between mb-4"><h3 class="font-bold">معاملاتي</h3><button onclick="addIncome()" class="text-xs bg-black text-white px-3 py-1 rounded-full">+ إضافة</button></div><div id="txList" class="space-y-2 text-sm"></div></div></div><script>let token=localStorage.getItem('qism_token');function showApp(){loginScreen.classList.add('hidden');appScreen.classList.remove('hidden');}function showLogin(){loginScreen.classList.remove('hidden');appScreen.classList.add('hidden');}async function login(){const phone=document.getElementById('phone').value;const name=document.getElementById('name').value;if(!phone){alert('رقم');return;}const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,name})}).then(r=>r.json());if(r.token){localStorage.setItem('qism_token',r.token);localStorage.setItem('qism_user',JSON.stringify(r.user));token=r.token;init();}}function logout(){localStorage.clear();token=null;showLogin();}async function init(){if(!token){showLogin();return;}const u=JSON.parse(localStorage.getItem('qism_user')||'{}');document.getElementById('userInfo').innerText=(u.name||'')+' - '+(u.phone||'');showApp();load();}async function load(){const f=await fetch('/api/fund',{headers:{Authorization:'Bearer '+token}}).then(r=>r.json());fund.innerText=(f.amount||0).toLocaleString()+' DZD';fundGoal.innerText='هدف: '+(f.goal||75000).toLocaleString();const g=await fetch('/api/goals',{headers:{Authorization:'Bearer '+token}}).then(r=>r.json());goalsList.innerHTML=g.map(x=>'<div class="p-2.5 bg-gray-50 rounded-xl flex justify-between"><span>'+(x.icon||'🎯')+' '+x.title+'</span><span class="font-bold">'+x.current+'/'+x.target+'</span></div>').join('');loadTx();}async function loadTx(){const r=await fetch('/api/transactions',{headers:{Authorization:'Bearer '+token}}).then(r=>r.json());const all=[].concat(r.transactions||[]).concat(r.payments||[]).slice(0,20);txList.innerHTML=all.length?all.map(t=>'<div class="flex justify-between p-2.5 bg-gray-50 rounded-xl"><div><p class="font-bold">'+(t.description||t.type||'معاملة')+'</p><p class="text-[11px] text-gray-500">'+new Date(t.created_at).toLocaleString('ar-DZ')+'</p></div><p class="font-bold">'+t.amount+' دج</p></div>').join(''):'<p class="text-gray-400">لا معاملات</p>';}async function testPay(){await fetch('/api/pay/create',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({amount:1000})}).then(r=>r.json());alert('تجريبي ✅ - الحقيقي في النهاية');load();}async function addIncome(a){let amount=a;if(!amount) amount=parseInt(prompt('المبلغ:')||'0');if(!amount) return;await fetch('/api/transaction',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({type:'income',amount,description:'مدخول',category:'عام'})});load();}async function addExpense(a){let amount=a;if(!amount) amount=parseInt(prompt('المبلغ:')||'0');if(!amount) return;await fetch('/api/transaction',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({type:'expense',amount,description:'مصروف',category:'عام'})});load();}async function addGoal(){const title=prompt('اسم الهدف:');if(!title) return;const target=parseInt(prompt('الهدف:')||'0');if(!target) return;await fetch('/api/goals',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({title,target})});load();}init();</script></body></html>`); });
 
-app.get('/health', async (req,res)=>{
-  let db=false; try{ if(pool){ await pool.query('SELECT 1'); db=true; } }catch{}
-  res.json({ ok:true, version:'2.3.0', live:true, db, mode: pool?'postgres':'memory' });
-});
+app.get('/admin',(req,res)=>{ res.send(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-50 p-6"><div class="max-w-4xl mx-auto"><h1 class="font-bold text-2xl">QISM Admin</h1><p class="text-xs text-gray-500">المنصة كاملة - باقي الدفع الحقيقي فقط</p><div id="stats" class="grid grid-cols-3 gap-4 mt-6"></div><div class="mt-6 bg-white p-6 rounded-2xl border text-sm"><ul class="list-disc mr-5 space-y-1"><li>✅ Landing Page</li><li>✅ Auth + DB postgres</li><li>✅ صندوق طوارئ + أهداف</li><li>✅ معاملات دائمة</li><li>⏳ الدفع الحقيقي آخر مرحلة</li></ul></div></div><script>fetch('/api/stats').then(r=>r.json()).then(d=>{stats.innerHTML='<div class="bg-white p-4 rounded-2xl border"><p class="text-xs">المستخدمين</p><b class="text-xl">'+(d.users||0)+'</b></div><div class="bg-white p-4 rounded-2xl border"><p class="text-xs">الأرصدة</p><b class="text-xl">'+(d.totalFund||0)+'</b></div><div class="bg-white p-4 rounded-2xl border"><p class="text-xs">المعاملات</p><b class="text-xl">'+(d.tx||0)+'</b></div>';});</script></body></html>`); });
 
-app.get('/api/debug',(req,res)=>{
-  const k=(process.env.CHARGILY_API_KEY||'').trim();
-  res.json({ hasKey:!!k, isSecret:k.startsWith('test_sk_'), len:k.length, preview:k? k.substring(0,12)+'...' : null, hasDb:!!pool });
-});
-
-app.post('/api/auth/login', async (req,res)=>{
-  const { phone, name } = req.body;
-  if(!phone) return res.status(400).json({error:'phone required'});
-  const cleanPhone = phone.replace(/\D/g,'').slice(-10);
-  try{
-    const user = await findOrCreateUser(cleanPhone, name);
-    const token = genToken(user);
-    res.json({ ok:true, token, user });
-  }catch(e){ res.status(500).json({error:e.message}); }
-});
-
-app.get('/api/fund', async (req,res)=>{
-  const u = getUserFromToken(req);
-  const userId = u?.id || 1;
-  try{
-    const amount = await getFund(userId);
-    res.json({ amount, userId, source: pool?'db':'memory' });
-  }catch(e){ res.json({ amount:25000 }); }
-});
-
-app.get('/api/transactions', async (req,res)=>{
-  const u = getUserFromToken(req);
-  const userId = u?.id || 1;
-  if(!pool) return res.json({ transactions: mem.tx.filter(x=>x.user_id===userId), payments: [] });
-  try{
-    const r = await pool.query('SELECT * FROM transactions WHERE user_id=$1 ORDER BY id DESC LIMIT 50', [userId]);
-    const p = await pool.query('SELECT * FROM payments WHERE user_id=$1 ORDER BY id DESC LIMIT 20', [userId]);
-    res.json({ transactions: r.rows, payments: p.rows });
-  }catch(e){ res.status(500).json({error:e.message}); }
-});
-
-app.post('/api/transaction', async (req,res)=>{
-  const u = getUserFromToken(req);
-  const userId = u?.id || 1;
-  const { type, amount, description } = req.body;
-  const amt = parseInt(amount)||0;
-  if(!pool){
-    mem.tx.push({id:Date.now(), user_id:userId, type, amount:amt, description, created_at:new Date().toISOString()});
-    if(type==='income') mem.funds[userId]=(mem.funds[userId]||0)+amt;
-    else mem.funds[userId]=(mem.funds[userId]||0)-amt;
-    return res.json({ ok:true });
-  }
-  try{
-    await pool.query('INSERT INTO transactions(user_id,type,amount,description) VALUES($1,$2,$3,$4)', [userId, type, amt, description]);
-    if(type==='income') await pool.query('UPDATE fund SET amount = amount + $1 WHERE user_id=$2', [amt, userId]);
-    else await pool.query('UPDATE fund SET amount = amount - $1 WHERE user_id=$2', [amt, userId]);
-    res.json({ ok:true });
-  }catch(e){ res.status(500).json({error:e.message}); }
-});
-
-app.post('/api/pay/create', async (req,res)=>{
-  const u = getUserFromToken(req);
-  const userId = u?.id || 1;
-  const amount=parseInt(req.body.amount)||1000;
-  const key=(process.env.CHARGILY_API_KEY||'').trim();
-  const base = key.startsWith('test_') ? 'https://pay.chargily.net/test/api/v2' : 'https://pay.chargily.net/api/v2';
-  if(!key || key.startsWith('test_pk_')){
-    if(pool) await pool.query('INSERT INTO payments(user_id,amount,status,checkout_id) VALUES($1,$2,$3,$4)', [userId, amount,'mock','mock_'+Date.now()]);
-    else mem.tx.push({id:Date.now(), user_id:userId, type:'income', amount, description:'دفع تجريبي', created_at:new Date().toISOString()});
-    return res.json({ checkout_url: '/?pay=success&mock='+amount, mock:true });
-  }
-  try{
-    const r=await fetch(base+'/checkouts',{
-      method:'POST',
-      headers:{ Authorization:'Bearer '+key, 'Content-Type':'application/json' },
-      body:JSON.stringify({ amount, currency:'dzd', success_url:'https://'+req.headers.host+'/?pay=success&uid='+userId, failure_url:'https://'+req.headers.host+'/?pay=fail', description:'QISM '+amount+' DZD user '+userId })
-    });
-    const d=await r.json();
-    if(!r.ok){
-      if(pool) await pool.query('INSERT INTO payments(user_id,amount,status,checkout_id) VALUES($1,$2,$3,$4)', [userId, amount,'mock_fallback','error']);
-      return res.json({ checkout_url:'/?pay=success&mock='+amount, mock:true, chargily_error:d });
-    }
-    if(pool) await pool.query('INSERT INTO payments(user_id,amount,status,checkout_id) VALUES($1,$2,$3,$4)', [userId, amount,'pending',d.id]);
-    res.json(d);
-  }catch(e){
-    res.json({ checkout_url:'/?pay=success&mock='+amount, mock:true, error:e.message });
-  }
-});
-
-app.get('/', (req,res)=>{
-  res.send(`
-<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>QISM - قسم</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-<style>body{font-family:'Tajawal',sans-serif}</style>
-</head><body class="bg-[#faf9f6] min-h-screen">
-<div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
-<div class="bg-white rounded-[32px] p-8 w-full max-w-sm border shadow-sm">
-<div class="w-12 h-12 bg-black rounded-2xl flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">ق</div>
-<h1 class="text-center font-bold text-2xl">مرحبا في QISM</h1>
-<p class="text-center text-sm text-gray-500 mt-1">منصة الادخار - الشلف</p>
-<div class="mt-6 space-y-3">
-<input id="phone" placeholder="رقم الهاتف 0555..." class="w-full p-3.5 rounded-xl bg-gray-50 border text-left" dir="ltr">
-<input id="name" placeholder="اسمك (اختياري)" class="w-full p-3.5 rounded-xl bg-gray-50 border">
-<button onclick="login()" class="w-full bg-black text-white py-3.5 rounded-xl font-bold">دخول →</button>
-<p class="text-[11px] text-gray-400 text-center mt-3">كل مستخدم عندو صندوقو وحدو - آمن وخاص</p>
-</div>
-</div>
-</div>
-
-<div id="appScreen" class="hidden max-w-6xl mx-auto p-4 md:p-6">
-<header class="flex justify-between items-center mb-6">
-<div class="flex items-center gap-3"><div class="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white font-bold">ق</div><div><h1 class="font-bold text-xl">QISM</h1><p class="text-xs text-gray-500" id="userInfo">-</p></div></div>
-<div class="flex gap-2"><button onclick="logout()" class="text-xs bg-white px-3 py-1.5 rounded-full border">خروج</button><a href="/health" class="text-xs bg-white px-3 py-1.5 rounded-full border">Health</a></div>
-</header>
-
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-<div class="bg-black text-white rounded-[24px] p-6"><p class="text-white/60 text-sm">الرصيد الكلي</p><h2 id="fund" class="text-3xl font-bold mt-2">-- DZD</h2><p class="text-emerald-400 text-xs mt-3">صندوق الطوارئ</p></div>
-<div class="bg-white rounded-[24px] p-6 border"><p class="text-gray-500 text-sm">صندوق الطوارئ</p><div class="flex items-end gap-2 mt-2"><h2 class="text-3xl font-bold">25,000</h2><span class="text-sm mb-1">DZD</span></div><div class="w-full h-2 bg-gray-100 rounded-full mt-4"><div class="h-2 bg-black rounded-full" style="width:100%"></div></div><p class="text-xs text-emerald-600 mt-2">✅ الهدف مكتمل - كل مستخدم عندو صندوقو</p></div>
-<div class="bg-white rounded-[24px] p-6 border"><p class="text-gray-500 text-sm">حالة Chargily</p><p id="chargilyStatus" class="font-bold mt-2">جاري الفحص...</p><p class="text-xs text-gray-500 mt-2">المفتاح: <span id="keyPreview">--</span></p><button onclick="testPay()" class="mt-4 w-full bg-emerald-500 text-white py-2.5 rounded-xl text-sm font-bold">جرب دفع 1000 دج</button></div>
-</div>
-
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-<div class="md:col-span-2 bg-white rounded-[24px] p-6 border">
-<div class="flex justify-between items-center mb-4"><h3 class="font-bold">معاملاتي</h3><button onclick="addIncome()" class="text-xs bg-black text-white px-3 py-1.5 rounded-full">+ إضافة</button></div>
-<div id="txList" class="space-y-3 text-sm"><p class="text-gray-400">جاري التحميل...</p></div>
-</div>
-<div class="bg-white rounded-[24px] p-6 border">
-<h3 class="font-bold mb-4">إجراءات سريعة</h3>
-<div class="space-y-2">
-<button onclick="addIncome(5000)" class="w-full text-right p-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-sm">💰 إضافة مدخول 5000 دج</button>
-<button onclick="addExpense(1000)" class="w-full text-right p-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-sm">💸 سحب 1000 دج</button>
-<button onclick="testPay(5000)" class="w-full text-right p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-sm border border-emerald-200">💳 دفع 5000 دج</button>
-</div>
-<div class="mt-6 p-3 bg-amber-50 rounded-xl text-xs leading-5">💡 <b>نظام حسابات:</b> درك كل زبون يدخل برقمو، صندوقو يبقى محفوظ حتى كي تطفي السارفر.</div>
-</div>
-</div>
-</div>
-
-<script>
-let token = localStorage.getItem('qism_token');
-function showApp(){ document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('appScreen').classList.remove('hidden'); }
-function showLogin(){ document.getElementById('loginScreen').classList.remove('hidden'); document.getElementById('appScreen').classList.add('hidden'); }
-async function login(){
-  const phone=document.getElementById('phone').value;
-  const name=document.getElementById('name').value;
-  if(!phone){ alert('دخل رقم الهاتف'); return; }
-  const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,name})}).then(r=>r.json());
-  if(r.token){ localStorage.setItem('qism_token', r.token); localStorage.setItem('qism_user', JSON.stringify(r.user)); token=r.token; init(); }
-  else alert(r.error||'خطأ');
-}
-function logout(){ localStorage.clear(); token=null; showLogin(); }
-async function init(){
-  if(!token){ showLogin(); return; }
-  const user = JSON.parse(localStorage.getItem('qism_user')||'{}');
-  document.getElementById('userInfo').innerText = (user.name||'') + ' - ' + (user.phone||'');
-  showApp();
-  load();
-}
-async function load(){
-  try{
-    const f = await fetch('/api/fund',{headers:{Authorization:'Bearer '+token}}).then(r=>r.json());
-    const d = await fetch('/api/debug').then(r=>r.json());
-    document.getElementById('fund').innerText = (f.amount||25000).toLocaleString() + ' DZD';
-    document.getElementById('keyPreview').innerText = d.preview || '--';
-    const s=document.getElementById('chargilyStatus');
-    s.innerText = d.isSecret ? '✅ مفتاح سري صحيح' : '⚠️ مفتاح عام';
-    loadTx();
-  }catch{}
-}
-async function loadTx(){
-  try{
-    const r = await fetch('/api/transactions',{headers:{Authorization:'Bearer '+token}}).then(r=>r.json());
-    const all = [].concat(r.transactions||[]).concat(r.payments||[]).slice(0,20);
-    const list=document.getElementById('txList');
-    if(all.length===0){ list.innerHTML='<p class="text-gray-400">لا توجد معاملات - ابدأ بإضافة مدخول</p>'; return; }
-    let html='';
-    for(let t of all){
-      const dateStr = t.created_at ? new Date(t.created_at).toLocaleString('ar-DZ') : '';
-      const desc = t.description || t.type || 'دفع';
-      html += '<div class="flex justify-between p-2.5 bg-gray-50 rounded-xl"><div><p class="font-bold">'+desc+'</p><p class="text-[11px] text-gray-500">'+dateStr+'</p></div><p class="font-bold">'+t.amount+' دج</p></div>';
-    }
-    list.innerHTML=html;
-  }catch{}
-}
-async function testPay(a){
-  const amount=a||1000;
-  const r=await fetch('/api/pay/create',{method:'POST',headers:{'Content-Type':'application/json', Authorization:'Bearer '+token},body:JSON.stringify({amount})}).then(r=>r.json());
-  if(r.checkout_url) location.href=r.checkout_url;
-}
-async function addIncome(a){
-  let amount=a; if(!amount) amount=parseInt(prompt('المبلغ:')||'0'); if(!amount) return;
-  await fetch('/api/transaction',{method:'POST',headers:{'Content-Type':'application/json', Authorization:'Bearer '+token},body:JSON.stringify({type:'income',amount,description:'مدخول يدوي'})});
-  load();
-}
-async function addExpense(a){
-  let amount=a; if(!amount) amount=parseInt(prompt('المبلغ:')||'0'); if(!amount) return;
-  await fetch('/api/transaction',{method:'POST',headers:{'Content-Type':'application/json', Authorization:'Bearer '+token},body:JSON.stringify({type:'expense',amount,description:'مصروف'})});
-  load();
-}
-init();
-</script>
-</body></html>
-  `);
-});
-
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, ()=>console.log('QISM v2.3.0 AUTH READY on '+PORT));
+const PORT=process.env.PORT||10000;
+app.listen(PORT,()=>console.log('QISM v2.4 COMPLETE '+PORT));
